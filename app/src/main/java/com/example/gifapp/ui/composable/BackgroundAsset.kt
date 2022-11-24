@@ -12,18 +12,80 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.gifapp.R
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
+fun BackgroundAsset() {
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        val (topBar, assetContainer, bottomContainer) = createRefs()
+
+        //Top bar
+        // topBarHeight = (default app bar height) + (button padding)
+        val topBarHeight = remember {
+            56 + 16
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(topBarHeight.dp)
+                .constrainAs(topBar) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+                .zIndex(2f)
+                .background(Color.White)
+        )
+
+        //Gif capture area
+        val configuration = LocalConfiguration.current
+        val assetContainerHeight = remember {
+            (configuration.screenHeightDp * 0.6).toInt()
+        }
+        RenderBackground(
+            modifier = Modifier
+                .constrainAs(assetContainer) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(topBar.bottom)
+                },
+            assetContainerHeightDp = assetContainerHeight
+        )
+        // Bottom container
+        val bottomContainerHeight = remember {
+            configuration.screenHeightDp - assetContainerHeight - topBarHeight
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(bottomContainerHeight.dp)
+                .constrainAs(bottomContainer) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    top.linkTo(assetContainer.bottom)
+                    bottom.linkTo(parent.bottom)
+                }
+                .zIndex(2f)
+                .background(Color.White)
+        )
+    }
+
+}
+
+@Composable
 fun RenderBackground(
+    modifier: Modifier,
     assetContainerHeightDp: Int
 ) {
-    Box(modifier = Modifier.wrapContentSize())
+    Box(modifier = modifier.wrapContentSize())
     {
         val backgroundAsset = painterResource(id = R.drawable.background_image)
         Image(
