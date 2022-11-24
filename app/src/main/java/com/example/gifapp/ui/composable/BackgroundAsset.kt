@@ -32,7 +32,10 @@ fun BackgroundAsset() {
         val topBarHeight = remember {
             56 + 16
         }
-        Box(
+        var isRecording by remember {
+            mutableStateOf(false)
+        }
+        RecordActionBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(topBarHeight.dp)
@@ -42,7 +45,11 @@ fun BackgroundAsset() {
                     end.linkTo(parent.end)
                 }
                 .zIndex(2f)
-                .background(Color.White)
+                .background(Color.White),
+            isRecording = isRecording,
+            updateIsRecording = {
+                isRecording = it
+            }
         )
 
         //Gif capture area
@@ -63,7 +70,7 @@ fun BackgroundAsset() {
         val bottomContainerHeight = remember {
             configuration.screenHeightDp - assetContainerHeight - topBarHeight
         }
-        Box(
+        BackgroundAssetFooter(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(bottomContainerHeight.dp)
@@ -74,7 +81,11 @@ fun BackgroundAsset() {
                     bottom.linkTo(parent.bottom)
                 }
                 .zIndex(2f)
-                .background(Color.White)
+                .background(Color.White),
+            isRecording = isRecording,
+            launchImagePicker = {
+                //TODO()
+            }
         )
     }
 
