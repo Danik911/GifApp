@@ -6,12 +6,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
@@ -20,49 +19,58 @@ import com.canhub.cropper.options
 import com.example.gifapp.ui.composable.BackgroundAsset
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
+import kotlinx.coroutines.flow.onEach
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels<MainViewModel>()
 
     private val cropAssetLauncher: ActivityResultLauncher<CropImageContractOptions> =
         this.registerForActivityResult(CropImageContract()) { cropResult ->
             if (cropResult.isSuccessful) {
                 cropResult.uriContent?.let { uri ->
-                    when (val state = _state.value) {
+                    when (val state = viewModel.state) {
                         is MainState.DisplaySelectBackgroundAsset,
                         is MainState.DisplayBackgroundAsset -> {
-                            _state.value = MainState.DisplayBackgroundAsset(
-                                backgroundAssetUri = uri
+                            viewModel.updateState(
+                                mainState = MainState.DisplayBackgroundAsset(
+                                    backgroundAssetUri = uri
+                                )
                             )
                         }
                         else -> throw Exception("Invalid state: $state")
                     }
                 }
             } else {
-                Toast.makeText(
-                    this,
-                    "Something went wrong cropping the image", Toast.LENGTH_SHORT
-                ).show()
+                viewModel.showToast(message = "Something went wrong cropping the image")
+
             }
 
         }
 
     private val backgroundAssetPickerLauncher: ActivityResultLauncher<String> =
         this.registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-
-            cropAssetLauncher.launch(
-                options(
-                    uri = uri
-                ) {
-                    setGuidelines(CropImageView.Guidelines.ON)
-                }
-            )
+            uri?.let {
+                cropAssetLauncher.launch(
+                    options(
+                        uri = uri
+                    ) {
+                        setGuidelines(CropImageView.Guidelines.ON)
+                    }
+                )
+            } ?: viewModel.showToast(message = "Something went wrong selecting the image")
         }
-
-    private val _state: MutableState<MainState> = mutableStateOf(MainState.Initial)
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        viewModel.toastEventRelay.onEach { toastEvent ->
+            if (toastEvent != null) {
+                Toast.makeText(this, toastEvent.message, Toast.LENGTH_LONG).show()
+            }
+        }
+
         setContent {
             GifAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -70,14 +78,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    val state = _state.value
+
+                    val state = viewModel.state
                     Column(modifier = Modifier.fillMaxSize()) {
                         when (state) {
                             MainState.Initial -> {
                                 //TODO("Show loading UI)
-                                _state.value = MainState.DisplaySelectBackgroundAsset(
-                                    backgroundAssetPickerLauncher
-                                )
+                                viewModel.updateState(MainState.DisplaySelectBackgroundAsset)
                             }
                             is MainState.DisplaySelectBackgroundAsset -> SelectBackgroundAsset(
                                 launchImagePicker = {
