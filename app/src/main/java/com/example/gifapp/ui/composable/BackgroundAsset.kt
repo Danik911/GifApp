@@ -1,5 +1,6 @@
 package com.example.gifapp.ui.composable
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -23,7 +24,10 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun BackgroundAsset() {
+fun BackgroundAsset(
+    backgroundAssetUri: Uri,
+    launchImagePicker: () -> Unit
+) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (topBar, assetContainer, bottomContainer) = createRefs()
 
@@ -64,7 +68,8 @@ fun BackgroundAsset() {
                     end.linkTo(parent.end)
                     top.linkTo(topBar.bottom)
                 },
-            assetContainerHeightDp = assetContainerHeight
+            assetContainerHeightDp = assetContainerHeight,
+            backgroundAssetUri = backgroundAssetUri
         )
         // Bottom container
         val bottomContainerHeight = remember {
@@ -83,9 +88,7 @@ fun BackgroundAsset() {
                 .zIndex(2f)
                 .background(Color.White),
             isRecording = isRecording,
-            launchImagePicker = {
-                //TODO()
-            }
+            launchImagePicker = launchImagePicker
         )
     }
 
@@ -94,6 +97,7 @@ fun BackgroundAsset() {
 @Composable
 fun RenderBackground(
     modifier: Modifier,
+    backgroundAssetUri: Uri,
     assetContainerHeightDp: Int
 ) {
     Box(modifier = modifier.wrapContentSize())
