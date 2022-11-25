@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.rememberAsyncImagePainter
 import com.example.gifapp.R
 import kotlin.math.PI
 import kotlin.math.cos
@@ -102,7 +103,7 @@ fun RenderBackground(
 ) {
     Box(modifier = modifier.wrapContentSize())
     {
-        val backgroundAsset = painterResource(id = R.drawable.background_image)
+        val backgroundAsset = rememberAsyncImagePainter(model = backgroundAssetUri)
         Image(
             modifier = Modifier
                 .fillMaxWidth()
