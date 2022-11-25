@@ -1,4 +1,4 @@
-package com.example.gifapp.ui.theme
+package com.example.gifapp.ui.composable.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
