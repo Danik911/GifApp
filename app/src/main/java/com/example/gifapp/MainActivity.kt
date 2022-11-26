@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
@@ -34,7 +35,8 @@ class MainActivity : ComponentActivity() {
                         is MainState.DisplayBackgroundAsset -> {
                             viewModel.updateState(
                                 mainState = MainState.DisplayBackgroundAsset(
-                                    backgroundAssetUri = uri
+                                    backgroundAssetUri = uri,
+                                    capturedBitmap = null
                                 )
                             )
                         }
@@ -80,6 +82,8 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val state = viewModel.state
+                    val view = LocalView.current
+
                     Column(modifier = Modifier.fillMaxSize()) {
                         when (state) {
                             MainState.Initial -> {
@@ -92,12 +96,23 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                             is MainState.DisplayBackgroundAsset -> BackgroundAsset(
+                                capturedBitmap = state.capturedBitmap,
                                 backgroundAssetUri = state.backgroundAssetUri,
                                 launchImagePicker = {
                                     backgroundAssetPickerLauncher.launch("image/*")
+                                },
+                                updateCapturingViewBounds = { rect ->
+                                    viewModel.updateState(
+                                        state.copy(capturingViewBounds = rect)
+                                    )
+                                },
+                                startBitmapCaptureJob = {
+                                    viewModel.captureScreenshot(
+                                        view = view,
+                                        window = window
+                                    )
                                 }
                             )
-
                         }
                     }
                 }

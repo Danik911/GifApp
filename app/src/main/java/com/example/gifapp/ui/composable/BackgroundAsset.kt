@@ -1,5 +1,6 @@
 package com.example.gifapp.ui.composable
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,11 +9,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -27,7 +31,10 @@ import kotlin.math.sin
 @Composable
 fun BackgroundAsset(
     backgroundAssetUri: Uri,
-    launchImagePicker: () -> Unit
+    launchImagePicker: () -> Unit,
+    capturedBitmap: Bitmap?,
+    updateCapturingViewBounds: (Rect) -> Unit,
+    startBitmapCaptureJob: () -> Unit
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (topBar, assetContainer, bottomContainer) = createRefs()
@@ -54,6 +61,10 @@ fun BackgroundAsset(
             isRecording = isRecording,
             updateIsRecording = {
                 isRecording = it
+                if (isRecording) {
+                    startBitmapCaptureJob()
+                    isRecording = false
+                }
             }
         )
 
@@ -70,8 +81,11 @@ fun BackgroundAsset(
                     top.linkTo(topBar.bottom)
                 },
             assetContainerHeightDp = assetContainerHeight,
-            backgroundAssetUri = backgroundAssetUri
+            backgroundAssetUri = backgroundAssetUri,
+            capturedBitmap = capturedBitmap,
+            updateCapturingViewBounds = updateCapturingViewBounds
         )
+
         // Bottom container
         val bottomContainerHeight = remember {
             configuration.screenHeightDp - assetContainerHeight - topBarHeight
@@ -99,16 +113,26 @@ fun BackgroundAsset(
 fun RenderBackground(
     modifier: Modifier,
     backgroundAssetUri: Uri,
-    assetContainerHeightDp: Int
+    assetContainerHeightDp: Int,
+    capturedBitmap: Bitmap?,
+    updateCapturingViewBounds: (Rect) -> Unit
 ) {
     Box(modifier = modifier.wrapContentSize())
     {
-        val backgroundAsset = rememberAsyncImagePainter(model = backgroundAssetUri)
+
+        val painter = if (capturedBitmap != null) {
+            rememberAsyncImagePainter(model = capturedBitmap)
+        } else {
+            rememberAsyncImagePainter(model = backgroundAssetUri)
+        }
         Image(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(assetContainerHeightDp.dp),
-            painter = backgroundAsset,
+                .height(assetContainerHeightDp.dp)
+                .onGloballyPositioned {
+                    updateCapturingViewBounds(it.boundsInRoot())
+                },
+            painter = painter,
             contentDescription = "Gif background",
             contentScale = ContentScale.Crop
         )
