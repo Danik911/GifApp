@@ -35,8 +35,7 @@ class MainActivity : ComponentActivity() {
                         is MainState.DisplayBackgroundAsset -> {
                             viewModel.updateState(
                                 mainState = MainState.DisplayBackgroundAsset(
-                                    backgroundAssetUri = uri,
-                                    capturedBitmap = null
+                                    backgroundAssetUri = uri
                                 )
                             )
                         }
@@ -96,7 +95,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                             is MainState.DisplayBackgroundAsset -> BackgroundAsset(
-                                capturedBitmap = state.capturedBitmap,
                                 backgroundAssetUri = state.backgroundAssetUri,
                                 launchImagePicker = {
                                     backgroundAssetPickerLauncher.launch("image/*")
@@ -107,7 +105,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 startBitmapCaptureJob = {
-                                    viewModel.captureScreenshot(
+                                    viewModel.runBitmapCaptureJob(
                                         view = view,
                                         window = window
                                     )

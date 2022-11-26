@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import com.example.gifapp.R
 import kotlin.math.PI
@@ -32,7 +33,6 @@ import kotlin.math.sin
 fun BackgroundAsset(
     backgroundAssetUri: Uri,
     launchImagePicker: () -> Unit,
-    capturedBitmap: Bitmap?,
     updateCapturingViewBounds: (Rect) -> Unit,
     startBitmapCaptureJob: () -> Unit
 ) {
@@ -82,7 +82,6 @@ fun BackgroundAsset(
                 },
             assetContainerHeightDp = assetContainerHeight,
             backgroundAssetUri = backgroundAssetUri,
-            capturedBitmap = capturedBitmap,
             updateCapturingViewBounds = updateCapturingViewBounds
         )
 
@@ -114,17 +113,13 @@ fun RenderBackground(
     modifier: Modifier,
     backgroundAssetUri: Uri,
     assetContainerHeightDp: Int,
-    capturedBitmap: Bitmap?,
     updateCapturingViewBounds: (Rect) -> Unit
 ) {
     Box(modifier = modifier.wrapContentSize())
     {
 
-        val painter = if (capturedBitmap != null) {
-            rememberAsyncImagePainter(model = capturedBitmap)
-        } else {
-            rememberAsyncImagePainter(model = backgroundAssetUri)
-        }
+        val painter = rememberAsyncImagePainter(model = backgroundAssetUri)
+
         Image(
             modifier = Modifier
                 .fillMaxWidth()

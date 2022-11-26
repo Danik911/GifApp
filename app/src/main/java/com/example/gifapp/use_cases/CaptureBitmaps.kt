@@ -81,6 +81,9 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
                             view = view
                         )
                     }
+                //Every time a new bitmap is captured, emit the updated list
+                bitmaps.add(bitmap)
+                emit(DataState.Data(data = bitmaps.toList()))
 
             }
 
