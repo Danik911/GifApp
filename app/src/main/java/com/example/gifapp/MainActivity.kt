@@ -21,6 +21,7 @@ import com.example.gifapp.ui.composable.BackgroundAsset
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
 
@@ -109,7 +110,9 @@ class MainActivity : ComponentActivity() {
                                         view = view,
                                         window = window
                                     )
-                                }
+                                },
+                                stopBitmapCaptureJob = viewModel::stopBitmapCaptureJob,
+                                bitmapLoadingState = state.bitmapCaptureLoadingState
                             )
                         }
                     }

@@ -71,4 +71,7 @@ dependencies {
     // ImageCropper
     implementation 'com.github.CanHub:Android-Image-Cropper:4.3.0'
 
+    //Timber
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
 }

@@ -1,6 +1,5 @@
 package com.example.gifapp.ui.composable
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,9 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
 import com.example.gifapp.R
+import com.example.gifapp.domain.DataState
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,7 +33,9 @@ fun BackgroundAsset(
     backgroundAssetUri: Uri,
     launchImagePicker: () -> Unit,
     updateCapturingViewBounds: (Rect) -> Unit,
-    startBitmapCaptureJob: () -> Unit
+    startBitmapCaptureJob: () -> Unit,
+    bitmapLoadingState: DataState.Loading.LoadingState,
+    stopBitmapCaptureJob: () -> Unit,
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (topBar, assetContainer, bottomContainer) = createRefs()
@@ -44,9 +45,7 @@ fun BackgroundAsset(
         val topBarHeight = remember {
             56 + 16
         }
-        var isRecording by remember {
-            mutableStateOf(false)
-        }
+
         RecordActionBar(
             modifier = Modifier
                 .fillMaxWidth()
@@ -58,14 +57,10 @@ fun BackgroundAsset(
                 }
                 .zIndex(2f)
                 .background(Color.White),
-            isRecording = isRecording,
-            updateIsRecording = {
-                isRecording = it
-                if (isRecording) {
-                    startBitmapCaptureJob()
-                    isRecording = false
-                }
-            }
+            bitmapLoadingState = bitmapLoadingState,
+            startBitmapCaptureJob = startBitmapCaptureJob,
+            stopBitmapCaptureJob = stopBitmapCaptureJob
+
         )
 
         //Gif capture area
@@ -101,7 +96,7 @@ fun BackgroundAsset(
                 }
                 .zIndex(2f)
                 .background(Color.White),
-            isRecording = isRecording,
+            isRecording = bitmapLoadingState is DataState.Loading.LoadingState.Active,
             launchImagePicker = launchImagePicker
         )
     }

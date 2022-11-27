@@ -47,8 +47,7 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
         window: Window?
     ): Flow<DataState<List<Bitmap>>> = flow {
 
-        emit(DataState.Loading(LoadingState.Active()))
-
+        emit(Loading(LoadingState.Active()))
         try {
             check(capturingViewBounds != null) { "Invalid view bounds" }
             check(view != null) { "View hasn't been found" }
@@ -57,7 +56,7 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
             while (elapsedTime < TOTAL_CAPTURE_TIME_MS) {
                 delay(CAPTURE_INTERVAL_MS.toLong())
                 elapsedTime += CAPTURE_INTERVAL_MS
-                emit(Loading(LoadingState.Active(elapsedTime / TOTAL_CAPTURE_TIME_MS)))
+                emit(Loading(LoadingState.Active(progress = elapsedTime / TOTAL_CAPTURE_TIME_MS)))
                 val bitmap =
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         check(window != null) { "Window is required for PixelCopy" }
@@ -84,6 +83,7 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
                 //Every time a new bitmap is captured, emit the updated list
                 bitmaps.add(bitmap)
                 emit(DataState.Data(data = bitmaps.toList()))
+
 
             }
 
