@@ -11,12 +11,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.gifapp.domain.DataState
 import com.example.gifapp.domain.DataState.Loading.LoadingState.Active
 import com.example.gifapp.domain.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.RealVersionProvider
 import com.example.gifapp.use_cases.CaptureBitmaps
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_ERROR
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_SUCCESS
 import com.example.gifapp.use_cases.PixelCopyJob
 import com.example.gifapp.use_cases.PixelCopyJobUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -29,7 +31,14 @@ class MainViewModel : ViewModel() {
 
     private val dispatcher = IO
     private val pixelCopy: PixelCopyJob = PixelCopyJobUseCase()
-    private val captureBitmaps: CaptureBitmaps = CaptureBitmapsUseCase(pixelCopy)
+    private val mainDispatcher = Dispatchers.Main
+    private val versionProvider = RealVersionProvider()
+    private val captureBitmaps: CaptureBitmaps =
+        CaptureBitmapsUseCase(
+            pixelCopyJob = pixelCopy,
+            mainDispatcher = mainDispatcher,
+            versionProvider = versionProvider
+        )
 
     var state by mutableStateOf<MainState>(MainState.Initial)
         private set

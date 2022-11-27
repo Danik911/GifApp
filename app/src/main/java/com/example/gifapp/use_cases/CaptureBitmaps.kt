@@ -8,18 +8,24 @@ import android.view.Window
 import androidx.compose.ui.geometry.Rect
 import androidx.core.graphics.applyCanvas
 import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.*
-import com.example.gifapp.domain.DataState.Loading.*
+import com.example.gifapp.domain.DataState.Loading
+import com.example.gifapp.domain.DataState.Loading.LoadingState
+import com.example.gifapp.domain.VersionProvider
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_INTERVAL_MS
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 interface CaptureBitmaps {
 
     /**
-     * @param window is only required if [Build.VERSON_CODES] >= [Build.VERVION_CODES.O]
+     * @param window is only required if [Build.VERSION_CODES] >= [Build.VERSION_CODES.O]
      * Otherwise this can be null
      */
 
@@ -33,13 +39,18 @@ interface CaptureBitmaps {
 /**
  * UseCase for capturing a list of bitmaps by screenshotting the device every [CAPTURE_INTERVAL_MS]
  *
- * The way I capture a screenshot diverges for [Build.VERSON_CODES] >= [Build.VERVION_CODES.O]
+ * The way I capture a screenshot diverges for [Build.VERSION_CODES] >= [Build.VERSION_CODES.O]
  * We must use [PixelCopy] for API level 26 (o) and above
  * We have to convert [PixelCopy] callback into coroutine and emmit into flow
  */
 
 class CaptureBitmapsUseCase
-constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
+constructor(
+    private val pixelCopyJob: PixelCopyJob,
+    val mainDispatcher: CoroutineDispatcher,
+    val versionProvider: VersionProvider
+    ) :
+    CaptureBitmaps {
 
     override fun execute(
         capturingViewBounds: Rect?,
@@ -58,7 +69,7 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
                 elapsedTime += CAPTURE_INTERVAL_MS
                 emit(Loading(LoadingState.Active(progress = elapsedTime / TOTAL_CAPTURE_TIME_MS)))
                 val bitmap =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    if (versionProvider.provideVersion() >= Build.VERSION_CODES.O) {
                         check(window != null) { "Window is required for PixelCopy" }
 
                         val pixelCopyJobState = pixelCopyJob.execute(
@@ -96,10 +107,10 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
     /**
      *  Capture a screenshot on API < [Build.VERSION_CODES.O]
      */
-    private fun captureBitmap(
+    private suspend fun captureBitmap(
         rect: Rect?,
         view: View
-    ): Bitmap {
+    ) = withContext(context = mainDispatcher) {
         check(rect != null) { "Invalid capture area" }
         val bitmap = Bitmap.createBitmap(
             rect.width.roundToInt(),
@@ -109,7 +120,7 @@ constructor(private val pixelCopyJob: PixelCopyJob) : CaptureBitmaps {
             translate(-rect.left, -rect.top)
             view.draw(this)
         }
-        return bitmap
+        return@withContext bitmap
     }
 
     companion object {
