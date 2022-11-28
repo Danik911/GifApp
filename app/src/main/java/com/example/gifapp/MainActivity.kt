@@ -20,12 +20,12 @@ import com.canhub.cropper.options
 import com.example.gifapp.ui.composable.BackgroundAsset
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
+import com.example.gifapp.use_cases.RealCacheProvided
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModels<MainViewModel>()
+    private val viewModel: MainViewModel by viewModels()
 
     private val cropAssetLauncher: ActivityResultLauncher<CropImageContractOptions> =
         this.registerForActivityResult(CropImageContract()) { cropResult ->
@@ -67,6 +67,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // TODO("This initialization will be removed after Hilt implementation")
+        viewModel.setCacheProvider(RealCacheProvided(app = application))
+
         viewModel.toastEventRelay.onEach { toastEvent ->
             if (toastEvent != null) {
                 Toast.makeText(this, toastEvent.message, Toast.LENGTH_LONG).show()
@@ -107,6 +110,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 startBitmapCaptureJob = {
                                     viewModel.runBitmapCaptureJob(
+                                        contentResolver = contentResolver,
                                         view = view,
                                         window = window
                                     )

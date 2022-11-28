@@ -24,7 +24,7 @@ interface BuildGif {
     ): Flow<DataState<BuildGifResult>>
 
     data class BuildGifResult(
-        val uri: Uri, val gigSize: Int
+        val uri: Uri, val gifSize: Int
     )
 }
 
