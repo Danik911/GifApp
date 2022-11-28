@@ -1,4 +1,4 @@
-package com.example.gifapp.domain
+package com.example.gifapp.domain.util
 
 import android.os.Build
 

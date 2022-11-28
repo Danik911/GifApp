@@ -10,16 +10,13 @@ import androidx.core.graphics.applyCanvas
 import com.example.gifapp.domain.DataState
 import com.example.gifapp.domain.DataState.Loading
 import com.example.gifapp.domain.DataState.Loading.LoadingState
-import com.example.gifapp.domain.VersionProvider
+import com.example.gifapp.domain.util.VersionProvider
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_INTERVAL_MS
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 interface CaptureBitmaps {

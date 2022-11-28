@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.gifapp.domain.DataState
 import com.example.gifapp.domain.DataState.Loading.LoadingState.Active
 import com.example.gifapp.domain.DataState.Loading.LoadingState.Idle
-import com.example.gifapp.domain.RealVersionProvider
+import com.example.gifapp.domain.util.RealVersionProvider
 import com.example.gifapp.use_cases.CaptureBitmaps
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_ERROR
