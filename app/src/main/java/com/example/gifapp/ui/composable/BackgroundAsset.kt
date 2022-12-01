@@ -23,7 +23,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.example.gifapp.R
-import com.example.gifapp.domain.DataState
+import com.example.gifapp.domain.DataState.Loading.LoadingState
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -34,8 +34,9 @@ fun BackgroundAsset(
     launchImagePicker: () -> Unit,
     updateCapturingViewBounds: (Rect) -> Unit,
     startBitmapCaptureJob: () -> Unit,
-    bitmapLoadingState: DataState.Loading.LoadingState,
+    bitmapLoadingState: LoadingState,
     stopBitmapCaptureJob: () -> Unit,
+    loadingState: LoadingState
 ) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (topBar, assetContainer, bottomContainer) = createRefs()
@@ -79,6 +80,7 @@ fun BackgroundAsset(
             backgroundAssetUri = backgroundAssetUri,
             updateCapturingViewBounds = updateCapturingViewBounds
         )
+        StandardLoadingUI(loadingState = loadingState)
 
         // Bottom container
         val bottomContainerHeight = remember {
@@ -96,7 +98,7 @@ fun BackgroundAsset(
                 }
                 .zIndex(2f)
                 .background(Color.White),
-            isRecording = bitmapLoadingState is DataState.Loading.LoadingState.Active,
+            isRecording = bitmapLoadingState is LoadingState.Active,
             launchImagePicker = launchImagePicker
         )
     }

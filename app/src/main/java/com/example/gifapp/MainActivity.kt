@@ -132,11 +132,13 @@ class MainActivity : ComponentActivity() {
                                     )
                                 },
                                 stopBitmapCaptureJob = viewModel::stopBitmapCaptureJob,
-                                bitmapLoadingState = state.bitmapCaptureLoadingState
+                                bitmapLoadingState = state.bitmapCaptureLoadingState,
+                                loadingState = state.loadingState
                             )
                             is MainState.DisplayGif -> Gif(
                                 imageLoader = imageLoader,
-                                gifUri = state.gifUri
+                                gifUri = state.gifUri,
+                                discardGif = viewModel::deleteGif
                             )
 
                         }

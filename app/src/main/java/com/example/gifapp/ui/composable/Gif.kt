@@ -21,7 +21,9 @@ import coil.compose.rememberAsyncImagePainter
 @Composable
 fun Gif(
     imageLoader: ImageLoader,
-    gifUri: Uri?
+    gifUri: Uri?,
+    discardGif: () -> Unit
+
 ) {
     val configuration = LocalConfiguration.current
     Box(
@@ -38,9 +40,7 @@ fun Gif(
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Button(
-                        onClick = {
-                            // TODO: Discard the gif and restart
-                        },
+                        onClick = discardGif,
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = Color.Red
                         )
