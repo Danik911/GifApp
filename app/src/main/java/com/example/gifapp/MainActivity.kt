@@ -1,5 +1,7 @@
 package com.example.gifapp
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -14,6 +16,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.core.content.ContextCompat
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
@@ -27,12 +30,51 @@ import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
 import com.example.gifapp.use_cases.RealCacheProvided
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
     private lateinit var imageLoader: ImageLoader
+
+    fun checkFilePermissions(): Boolean {
+        val writePermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        val readPermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+        return writePermission == PackageManager.PERMISSION_GRANTED &&
+                readPermission == PackageManager.PERMISSION_GRANTED
+    }
+
+    private val externalStoragePermissionRequest = this.registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        permissions.entries.forEach {
+            Timber.d("$it")
+            if (!it.value) {
+                Toast.makeText(
+                    this,
+                    "To enable this permission you will have to do so in system settings",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+
+    private fun launchPermissionRequest() {
+        externalStoragePermissionRequest.launch(
+            arrayOf(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+            )
+        )
+    }
 
     private val cropAssetLauncher: ActivityResultLauncher<CropImageContractOptions> =
         this.registerForActivityResult(CropImageContract()) { cropResult ->
@@ -138,7 +180,13 @@ class MainActivity : ComponentActivity() {
                             is MainState.DisplayGif -> Gif(
                                 imageLoader = imageLoader,
                                 gifUri = state.gifUri,
-                                discardGif = viewModel::deleteGif
+                                discardGif = viewModel::deleteGif,
+                                onSaveGif = {
+                                    viewModel.saveGif(
+                                        launchPermissionRequest = ::launchPermissionRequest,
+                                        checkFilePermission = ::checkFilePermissions
+                                    )
+                                }
                             )
 
                         }

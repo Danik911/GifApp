@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.view.View
 import android.view.Window
+import android.webkit.PermissionRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -50,6 +51,15 @@ class MainViewModel : ViewModel() {
 
     fun setCacheProvider(cacheProvider: CacheProvider) {
         this.cacheProvider = cacheProvider
+    }
+
+    fun saveGif(
+        launchPermissionRequest: () -> Unit,
+        checkFilePermission: () -> Boolean
+    ){
+        if (!checkFilePermission()){
+            launchPermissionRequest()
+        }
     }
 
     private fun buildGif(
@@ -236,11 +246,14 @@ class MainViewModel : ViewModel() {
     }
 
     fun showToast(
-        id: String = UUID.randomUUID().toString(), message: String
+        id: String = UUID.randomUUID().toString(),
+        message: String
     ) {
+        Timber.d("Show toast triggered")
         _toastEventRelay.tryEmit(
             ToastEvent(
-                id = id, message = message
+                id = id,
+                message = message
             )
         )
     }

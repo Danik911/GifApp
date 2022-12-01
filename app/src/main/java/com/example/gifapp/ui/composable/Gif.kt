@@ -22,7 +22,8 @@ import coil.compose.rememberAsyncImagePainter
 fun Gif(
     imageLoader: ImageLoader,
     gifUri: Uri?,
-    discardGif: () -> Unit
+    discardGif: () -> Unit,
+    onSaveGif: () -> Unit
 
 ) {
     val configuration = LocalConfiguration.current
@@ -53,9 +54,7 @@ fun Gif(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
-                        onClick = {
-                            // TODO: Save the Gif
-                        },
+                        onClick = onSaveGif,
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = Color.Green
                         )
