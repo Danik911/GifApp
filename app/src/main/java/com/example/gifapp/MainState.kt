@@ -17,6 +17,18 @@ sealed class MainState {
         val capturedBitmaps: List<Bitmap> = listOf(),
 
         //Displayed as a LinearProgressIndicator in the RecordActionBar
-        val bitmapCaptureLoadingState: LoadingState = LoadingState.Idle
+        val bitmapCaptureLoadingState: LoadingState = LoadingState.Idle,
+
+
+        // Displayed as a CircularIndeterminateProgressBar overlaid in the center of the screen
+        val loadingState: LoadingState = LoadingState.Idle
+
     ) : MainState()
+
+    data class DisplayGif(
+        val gifUri: Uri?,
+        val originalGifSize: Int,
+    ) : MainState()
+
+
 }

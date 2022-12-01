@@ -1,5 +1,6 @@
 package com.example.gifapp
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,11 +14,15 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import coil.ImageLoader
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.options
 import com.example.gifapp.ui.composable.BackgroundAsset
+import com.example.gifapp.ui.composable.Gif
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
 import com.example.gifapp.use_cases.RealCacheProvided
@@ -26,6 +31,8 @@ import kotlinx.coroutines.flow.onEach
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+
+    private lateinit var imageLoader: ImageLoader
 
     private val cropAssetLauncher: ActivityResultLauncher<CropImageContractOptions> =
         this.registerForActivityResult(CropImageContract()) { cropResult ->
@@ -69,6 +76,15 @@ class MainActivity : ComponentActivity() {
 
         // TODO("This initialization will be removed after Hilt implementation")
         viewModel.setCacheProvider(RealCacheProvided(app = application))
+        imageLoader = ImageLoader.Builder(application)
+            .components {
+                if (Build.VERSION.SDK_INT >= 28) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
+            .build()
 
         viewModel.toastEventRelay.onEach { toastEvent ->
             if (toastEvent != null) {
@@ -118,6 +134,11 @@ class MainActivity : ComponentActivity() {
                                 stopBitmapCaptureJob = viewModel::stopBitmapCaptureJob,
                                 bitmapLoadingState = state.bitmapCaptureLoadingState
                             )
+                            is MainState.DisplayGif -> Gif(
+                                imageLoader = imageLoader,
+                                gifUri = state.gifUri
+                            )
+
                         }
                     }
                 }
