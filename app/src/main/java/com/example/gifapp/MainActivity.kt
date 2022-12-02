@@ -184,9 +184,12 @@ class MainActivity : ComponentActivity() {
                                 onSaveGif = {
                                     viewModel.saveGif(
                                         launchPermissionRequest = ::launchPermissionRequest,
-                                        checkFilePermission = ::checkFilePermissions
+                                        checkFilePermission = ::checkFilePermissions,
+                                        contentResolver = contentResolver,
+                                        context = this@MainActivity
                                     )
-                                }
+                                },
+                                loadingState = state.loadingState
                             )
 
                         }

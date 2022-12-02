@@ -30,7 +30,8 @@ sealed class MainState {
         val originalGifSize: Int,
 
         //Carry around the original background assert URI in-case user resets the gif
-        val backgroundAssetUri: Uri
+        val backgroundAssetUri: Uri,
+        val loadingState: LoadingState = LoadingState.Idle
     ) : MainState()
 
 

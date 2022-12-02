@@ -17,15 +17,18 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import com.example.gifapp.domain.DataState
 
 @Composable
 fun Gif(
     imageLoader: ImageLoader,
     gifUri: Uri?,
     discardGif: () -> Unit,
-    onSaveGif: () -> Unit
+    onSaveGif: () -> Unit,
+    loadingState: DataState.Loading.LoadingState
 
 ) {
+    StandardLoadingUI(loadingState = loadingState)
     val configuration = LocalConfiguration.current
     Box(
         modifier = Modifier
