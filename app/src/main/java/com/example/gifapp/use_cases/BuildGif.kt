@@ -6,8 +6,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import androidx.core.net.toUri
-import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.*
+import com.example.gifapp.domain.model.DataState
+import com.example.gifapp.domain.model.DataState.*
 import com.example.gifapp.domain.util.AnimatedGIFWriter
 import com.example.gifapp.domain.util.FileNameBuilder
 import com.example.gifapp.domain.util.VersionProvider

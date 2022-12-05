@@ -3,13 +3,12 @@ package com.example.gifapp.ui.composable
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -17,7 +16,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import com.example.gifapp.domain.DataState
+import com.example.gifapp.domain.model.DataState
 
 @Composable
 fun Gif(
@@ -25,7 +24,15 @@ fun Gif(
     gifUri: Uri?,
     discardGif: () -> Unit,
     onSaveGif: () -> Unit,
-    loadingState: DataState.Loading.LoadingState
+    loadingState: DataState.Loading.LoadingState,
+    adjustedBytes: Int,
+    updatedAdjustedBytes: (Int) -> Unit,
+    sizePercentage: Int,
+    updateSizePercentage: (Int) -> Unit,
+    currentGifSize: Int,
+    isResizedGif: Boolean,
+    resizeGif: () -> Unit,
+    resetResizing: () -> Unit
 
 ) {
     StandardLoadingUI(loadingState = loadingState)
@@ -81,7 +88,82 @@ fun Gif(
                     painter = image,
                     contentDescription = "Gif image"
                 )
-                // TODO: Add footer for gif screen
+                GifFooter(
+                    adjustedBytes = adjustedBytes,
+                    updatedAdjustedBytes = updatedAdjustedBytes,
+                    sizePercentage = sizePercentage,
+                    updateSizePercentage = updateSizePercentage,
+                    gifSize = currentGifSize,
+                    isResizedGif = isResizedGif,
+                    resizeGif = resizeGif,
+                    resetResizing = resetResizing
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GifFooter(
+    adjustedBytes: Int,
+    updatedAdjustedBytes: (Int) -> Unit,
+    sizePercentage: Int,
+    updateSizePercentage: (Int) -> Unit,
+    gifSize: Int,
+    isResizedGif: Boolean,
+    resizeGif: () -> Unit,
+    resetResizing: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        Text(
+            modifier = Modifier.align(Alignment.End),
+            text = "Approximate gif size",
+            style = MaterialTheme.typography.h6
+        )
+        Text(
+            modifier = Modifier.align(Alignment.End),
+            style = MaterialTheme.typography.body1,
+            text = "${adjustedBytes / 1024} KB"
+        )
+        if (isResizedGif) {
+            Button(
+                modifier = Modifier.align(Alignment.End),
+                onClick = resetResizing
+            ) {
+                Text(
+                    text = "Reset resizing",
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        } else {
+            Text(
+                text = "$sizePercentage %",
+                style = MaterialTheme.typography.body1
+            )
+            var sliderPosition by remember {
+                mutableStateOf(100f)
+            }
+            Slider(
+                value = sliderPosition,
+                valueRange = 1f..100f,
+                onValueChange = {
+                    sliderPosition = it
+                    updateSizePercentage(sliderPosition.toInt())
+                    updatedAdjustedBytes(gifSize * sliderPosition.toInt() / 100)
+                }
+            )
+            Button(
+                modifier = Modifier.align(Alignment.End),
+                onClick = resizeGif
+            ) {
+                Text(
+                    text = "Resize",
+                    style = MaterialTheme.typography.body1
+                )
             }
         }
     }

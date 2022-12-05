@@ -11,9 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Active
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.model.DataState
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.model.MainState
 import com.example.gifapp.domain.util.RealVersionProvider
 import com.example.gifapp.use_cases.*
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_ERROR
@@ -135,7 +136,11 @@ class MainViewModel : ViewModel() {
                             MainState.DisplayGif(
                                 gifUri = gifUri,
                                 originalGifSize = gifSize,
-                                backgroundAssetUri = it.backgroundAssetUri
+                                backgroundAssetUri = it.backgroundAssetUri,
+                                resizedGifUri = null,
+                                capturedBitmaps = it.capturedBitmaps,
+                                sizePercentage = 100,
+                                adjustedByteSize = gifSize,
                             )
                         )
 

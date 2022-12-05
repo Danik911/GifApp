@@ -7,9 +7,9 @@ import android.view.View
 import android.view.Window
 import androidx.compose.ui.geometry.Rect
 import androidx.core.graphics.applyCanvas
-import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.Loading
-import com.example.gifapp.domain.DataState.Loading.LoadingState
+import com.example.gifapp.domain.model.DataState
+import com.example.gifapp.domain.model.DataState.Loading
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState
 import com.example.gifapp.domain.util.VersionProvider
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_INTERVAL_MS
 import kotlinx.coroutines.CoroutineDispatcher

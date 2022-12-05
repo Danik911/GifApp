@@ -1,9 +1,9 @@
-package com.example.gifapp
+package com.example.gifapp.domain.model
 
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.geometry.Rect
-import com.example.gifapp.domain.DataState.Loading.LoadingState
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState
 
 sealed class MainState {
 
@@ -28,6 +28,13 @@ sealed class MainState {
     data class DisplayGif(
         val gifUri: Uri?,
         val originalGifSize: Int,
+        val resizedGifUri: Uri?,
+        val adjustedByteSize: Int,
+        val sizePercentage: Int,
+        val capturedBitmaps: List<Bitmap> = listOf(),
+
+        // Displayed as a LinearProgressIndicator in the middle of the screen, occupying the entire view
+        val resizeGifLoadingState: LoadingState = LoadingState.Idle,
 
         //Carry around the original background assert URI in-case user resets the gif
         val backgroundAssetUri: Uri,

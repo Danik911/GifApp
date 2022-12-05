@@ -1,4 +1,4 @@
-package com.example.gifapp.domain
+package com.example.gifapp.domain.model
 
 sealed class DataState<T> {
 

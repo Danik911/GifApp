@@ -1,8 +1,8 @@
 package com.example.gifapp.use_cases
 
-import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Active
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.model.DataState
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 

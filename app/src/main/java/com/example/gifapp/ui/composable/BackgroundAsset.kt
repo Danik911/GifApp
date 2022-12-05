@@ -23,7 +23,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.example.gifapp.R
-import com.example.gifapp.domain.DataState.Loading.LoadingState
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

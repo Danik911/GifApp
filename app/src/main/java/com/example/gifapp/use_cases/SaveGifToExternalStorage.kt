@@ -10,9 +10,9 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
-import com.example.gifapp.domain.DataState
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Active
-import com.example.gifapp.domain.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.model.DataState
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
+import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
 import com.example.gifapp.domain.util.FileNameBuilder
 import com.example.gifapp.domain.util.VersionProvider
 import com.example.gifapp.use_cases.SaveGifToExternalStorageUseCase.Companion.saveGifToExternalStorage

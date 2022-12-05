@@ -24,6 +24,7 @@ import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
 import com.canhub.cropper.options
+import com.example.gifapp.domain.model.MainState
 import com.example.gifapp.ui.composable.BackgroundAsset
 import com.example.gifapp.ui.composable.Gif
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
@@ -189,7 +190,23 @@ class MainActivity : ComponentActivity() {
                                         context = this@MainActivity
                                     )
                                 },
-                                loadingState = state.loadingState
+                                loadingState = state.loadingState,
+                                adjustedBytes = state.adjustedByteSize,
+                                updatedAdjustedBytes = {
+                                    // TODO: delegate to viewModel
+                                },
+                                sizePercentage = state.sizePercentage,
+                                updateSizePercentage = {
+                                    // TODO: delegate to viewModel
+                                },
+                                currentGifSize = state.originalGifSize,
+                                isResizedGif = state.resizedGifUri != null,
+                                resizeGif = {
+                                    // TODO: delegate to viewModel
+                                },
+                                resetResizing = {
+                                    // TODO: delegate to viewModel
+                                },
                             )
 
                         }
