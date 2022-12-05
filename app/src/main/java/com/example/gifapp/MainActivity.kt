@@ -180,7 +180,7 @@ class MainActivity : ComponentActivity() {
                             )
                             is MainState.DisplayGif -> Gif(
                                 imageLoader = imageLoader,
-                                gifUri = state.gifUri,
+                                gifUri = state.resizedGifUri ?: state.gifUri,
                                 discardGif = viewModel::deleteGif,
                                 onSaveGif = {
                                     viewModel.saveGif(
