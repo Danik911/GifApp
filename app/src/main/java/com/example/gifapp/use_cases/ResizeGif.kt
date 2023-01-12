@@ -35,7 +35,7 @@ interface ResizeGif {
 /**
  * Use-case for resizing a gif
  *
- * The only way to resize Gif accurately is to iteratively resize in untill
+ * The only way to resize Gif accurately is to iteratively resize in until
  * you reach the target size
  */
 class ResizeGifUseCase constructor(

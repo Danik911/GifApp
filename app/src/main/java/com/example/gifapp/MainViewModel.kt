@@ -3,6 +3,7 @@ package com.example.gifapp
 import android.content.ContentResolver
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.view.View
 import android.view.Window
@@ -19,6 +20,7 @@ import com.example.gifapp.domain.util.RealVersionProvider
 import com.example.gifapp.use_cases.*
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_ERROR
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_SUCCESS
+import com.example.gifapp.use_cases.ResizeGifUseCase.Companion.RESIZE_GIF_ERROR
 import com.example.gifapp.use_cases.SaveGifToExternalStorageUseCase.Companion.SAVE_GIF_TO_EXTERNAL_STORAGE_ERROR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
@@ -27,6 +29,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.plus
 import timber.log.Timber
+import java.io.File
 import java.util.*
 
 class MainViewModel : ViewModel() {
@@ -272,6 +275,61 @@ class MainViewModel : ViewModel() {
             }
     }
 
+    fun resizeGif(
+        contentResolver: ContentResolver
+    ) {
+        check(state is MainState.DisplayGif) { "resizeGif: Invalid state: $state" }
+        (state as MainState.DisplayGif).let {
+            //Calculate the target size of the result gif
+            val targetSize = it.originalGifSize * (it.sizePercentage.toFloat() / 100)
+
+            // TODO:  ("This will be injected with Hilt")
+            val resizeGif: ResizeGif = ResizeGifUseCase(
+                versionProvider = versionProvider,
+                cacheProvider = cacheProvider!! // !! should be cleared
+            )
+
+            resizeGif.execute(
+                contentResolver = contentResolver,
+                capturedBitmaps = it.capturedBitmaps,
+                originalGifSize = it.originalGifSize.toFloat(),
+                targetSize = targetSize,
+                discardCachedGif = { uri ->
+                    discardCachedGif(uri)
+                },
+            ).onEach { dataState ->
+                when (dataState) {
+                    is DataState.Loading -> {
+                        updateState(
+                            (state as MainState.DisplayGif)
+                                .copy(resizeGifLoadingState = dataState.loadingState)
+                        )
+                    }
+                    is DataState.Data -> {
+                        dataState.data?.let { data ->
+                            state = (state as MainState.DisplayGif).copy(
+                                resizedGifUri = data.uri,
+                                adjustedByteSize = data.gifSize
+                            )
+                        } ?: throw Exception(RESIZE_GIF_ERROR)
+
+                    }
+                    is DataState.Error -> {
+                        publishErrorEvent(
+                            ErrorEvent(
+                                id = UUID.randomUUID().toString(),
+                                message = dataState.message
+                            )
+                        )
+                    }
+                }
+            }.onCompletion {
+                updateState((state as MainState.DisplayGif).copy(loadingState = Idle))
+            }.flowOn(dispatcher).launchIn(viewModelScope)
+        }
+    }
+
+
     private fun clearCachedFiles() {
         // TODO: It will be injected with Hilt
         val clearGifCache: ClearGifCache = ClearGifCacheUseCase(
@@ -322,5 +380,48 @@ class MainViewModel : ViewModel() {
     fun stopBitmapCaptureJob() {
         Timber.d("stopBitmap triggered")
         updateState((state as MainState.DisplayBackgroundAsset).copy(bitmapCaptureLoadingState = Idle))
+    }
+
+    fun resetToOriginal() {
+        check(state is MainState.DisplayGif) { "resetGifToOriginal: Invalid state: $state" }
+        (state as MainState.DisplayGif).run {
+            resizedGifUri?.let { uri ->
+                discardCachedGif(uri)
+            }
+            state = this.copy(
+                resizedGifUri = null,
+                adjustedByteSize = originalGifSize,
+                sizePercentage = 100
+            )
+        }
+    }
+
+    fun updateAdjustedBytes(adjustedBytes: Int) {
+        check(state is MainState.DisplayGif) { "updateAdjustedBytes: Invalid state: $state" }
+        state = (state as MainState.DisplayGif).copy(
+            adjustedByteSize = adjustedBytes
+        )
+    }
+
+    fun updateSizePercentage(sizePercentage: Int) {
+        check(state is MainState.DisplayGif) { "updateSizePercentage: Invalid state: $state" }
+        state = (state as MainState.DisplayGif).copy(
+            sizePercentage = sizePercentage
+        )
+    }
+
+    companion object {
+        const val DISCARD_CACHED_GIF_ERROR = "Failed to delete cached gif at uri"
+    }
+
+    /**
+     * Added to companion object for Unit tests
+     */
+    private fun discardCachedGif(uri: Uri) {
+        val file = File(uri.path)
+        val success = file.delete()
+        if (!success) {
+            throw Exception("$DISCARD_CACHED_GIF_ERROR $uri")
+        }
     }
 }
