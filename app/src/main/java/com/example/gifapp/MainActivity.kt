@@ -192,21 +192,16 @@ class MainActivity : ComponentActivity() {
                                 },
                                 loadingState = state.loadingState,
                                 adjustedBytes = state.adjustedByteSize,
-                                updatedAdjustedBytes = {
-                                    // TODO: delegate to viewModel
-                                },
+                                updatedAdjustedBytes = viewModel::updateAdjustedBytes,
                                 sizePercentage = state.sizePercentage,
-                                updateSizePercentage = {
-                                    // TODO: delegate to viewModel
-                                },
+                                updateSizePercentage = viewModel::updateSizePercentage,
                                 currentGifSize = state.originalGifSize,
                                 isResizedGif = state.resizedGifUri != null,
                                 resizeGif = {
-                                    // TODO: delegate to viewModel
+                                    viewModel.resizeGif(contentResolver = contentResolver)
                                 },
-                                resetResizing = {
-                                    // TODO: delegate to viewModel
-                                },
+                                resetToOriginal = viewModel::resetToOriginal,
+                                gifResizingLoadingState = state.resizeGifLoadingState
                             )
 
                         }

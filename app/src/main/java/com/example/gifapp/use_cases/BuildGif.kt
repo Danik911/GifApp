@@ -1,21 +1,14 @@
 package com.example.gifapp.use_cases
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
-import androidx.core.net.toUri
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.*
-import com.example.gifapp.domain.util.AnimatedGIFWriter
-import com.example.gifapp.domain.util.FileNameBuilder
 import com.example.gifapp.domain.util.GifUtil.buildGifAndSaveToInternalStorage
 import com.example.gifapp.domain.util.VersionProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.io.ByteArrayOutputStream
-import java.io.File
 
 interface BuildGif {
 
@@ -53,7 +46,7 @@ constructor(
                 cacheProvider = cacheProvider,
                 versionProvider = versionProvider
             )
-            emit(Data(result))
+            emit(Data(BuildGif.BuildGifResult(uri = result.uri, gifSize = result.gifSize)))
         } catch (e: Exception) {
             emit(Error(e.message ?: BUILD_GIF_ERROR))
         }
@@ -65,5 +58,5 @@ constructor(
         const val NO_BITMAPS_ERROR = "You can't build a gif when there are no Bitmaps"
         const val SAVE_GIF_TO_INTERNAL_STORAGE_ERROR =
             "An error occurred while trying to save the gif to internal storage"
-      }
+    }
 }

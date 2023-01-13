@@ -32,10 +32,12 @@ fun Gif(
     currentGifSize: Int,
     isResizedGif: Boolean,
     resizeGif: () -> Unit,
-    resetResizing: () -> Unit
-
+    resetToOriginal: () -> Unit,
+    gifResizingLoadingState: DataState.Loading.LoadingState
 ) {
     StandardLoadingUI(loadingState = loadingState)
+    ResizingGifLoadingUI(gifResizingLoadingState = gifResizingLoadingState)
+
     val configuration = LocalConfiguration.current
     Box(
         modifier = Modifier
@@ -96,7 +98,7 @@ fun Gif(
                     gifSize = currentGifSize,
                     isResizedGif = isResizedGif,
                     resizeGif = resizeGif,
-                    resetResizing = resetResizing
+                    resetResizing = resetToOriginal
                 )
             }
         }

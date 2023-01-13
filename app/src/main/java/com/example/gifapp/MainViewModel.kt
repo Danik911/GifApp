@@ -75,7 +75,9 @@ class MainViewModel : ViewModel() {
             launchPermissionRequest()
             return
         }
-        val uriToSave = (state as MainState.DisplayGif).gifUri ?: throw Exception(
+        val uriToSave = (state as MainState.DisplayGif).let {
+            it.resizedGifUri ?: it.gifUri
+        } ?: throw Exception(
             SAVE_GIF_TO_EXTERNAL_STORAGE_ERROR
         )
         saveGifToExternalStorage.execute(
