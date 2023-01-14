@@ -12,10 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gifapp.di.IO
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
 import com.example.gifapp.domain.model.MainState
+import com.example.gifapp.domain.util.CacheProvider
 import com.example.gifapp.domain.util.RealVersionProvider
 import com.example.gifapp.use_cases.*
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_ERROR
@@ -23,35 +25,25 @@ import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITM
 import com.example.gifapp.use_cases.ResizeGifUseCase.Companion.RESIZE_GIF_ERROR
 import com.example.gifapp.use_cases.SaveGifToExternalStorageUseCase.Companion.SAVE_GIF_TO_EXTERNAL_STORAGE_ERROR
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.plus
 import timber.log.Timber
 import java.io.File
 import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor(
+    @IO private val ioDispatcher: CoroutineDispatcher,
+    private val captureBitmaps: CaptureBitmaps,
+    private val versionProvider: RealVersionProvider,
+    private val clearGifCache: ClearGifCache,
+    private val resizeGif: ResizeGif,
+    private val buildGif: BuildGif,
+    private val saveGifToExternalStorage: SaveGifToExternalStorage
 
-    private val dispatcher = IO
-    private val pixelCopy: PixelCopyJob = PixelCopyJobUseCase()
-    private val mainDispatcher = Dispatchers.Main
-    private val versionProvider = RealVersionProvider()
-    private val captureBitmaps: CaptureBitmaps =
-        CaptureBitmapsUseCase(
-            pixelCopyJob = pixelCopy,
-            mainDispatcher = mainDispatcher,
-            versionProvider = versionProvider
-        )
-    private var cacheProvider: CacheProvider? = null
-    private val saveGifToExternalStorage: SaveGifToExternalStorage =
-        SaveGifToExternalStorageUseCase(
-            versionProvider = versionProvider
-        )
+) : ViewModel() {
 
     var state by mutableStateOf<MainState>(MainState.Initial)
         private set
@@ -62,9 +54,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
     private val _errorEventRelay: MutableStateFlow<Set<ErrorEvent>> = MutableStateFlow(setOf())
     val errorEventRelay: StateFlow<Set<ErrorEvent>> get() = _errorEventRelay
 
-    fun setCacheProvider(cacheProvider: CacheProvider) {
-        this.cacheProvider = cacheProvider
-    }
 
     fun saveGif(
         launchPermissionRequest: () -> Unit,
@@ -108,13 +97,12 @@ class MainViewModel @Inject constructor() : ViewModel() {
         }.onCompletion {
             // Whether or not this succeeds we want to clear the cache
             // Because if something goes wrong we want to reset anyway
-            clearCachedFiles()
 
             // reset state to display the selected background
             state = MainState.DisplayBackgroundAsset(
                 backgroundAssetUri = (state as MainState.DisplayGif).backgroundAssetUri
             )
-        }.flowOn(dispatcher).launchIn(viewModelScope)
+        }.flowOn(ioDispatcher).launchIn(viewModelScope)
     }
 
     private fun buildGif(
@@ -126,11 +114,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
         updateState(
             (state as MainState.DisplayBackgroundAsset).copy(loadingState = Active())
         )
-        // TODO: This will be injected into the ViewModel later
-        val buildGif: BuildGif = BuildGifUseCase(
-            versionProvider = versionProvider,
-            cacheProvider = cacheProvider!! // TODO: !! will be removed
-        )
+
         buildGif.execute(
             contentResolver = contentResolver,
             bitmaps = capturedBitmaps
@@ -177,7 +161,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                     }
                 }
             }
-        }.flowOn(dispatcher).launchIn(viewModelScope)
+        }.flowOn(ioDispatcher).launchIn(viewModelScope)
     }
 
     fun runBitmapCaptureJob(
@@ -251,7 +235,7 @@ class MainViewModel @Inject constructor() : ViewModel() {
                 }
             }
         }
-            .flowOn(dispatcher)
+            .flowOn(ioDispatcher)
             .launchIn(viewModelScope + bitmapJob)
             .invokeOnCompletion { throwable ->
                 updateState(
@@ -288,11 +272,6 @@ class MainViewModel @Inject constructor() : ViewModel() {
             //Calculate the target size of the result gif
             val targetSize = it.originalGifSize * (it.sizePercentage.toFloat() / 100)
 
-            // TODO:  ("This will be injected with Hilt")
-            val resizeGif: ResizeGif = ResizeGifUseCase(
-                versionProvider = versionProvider,
-                cacheProvider = cacheProvider!! // !! should be cleared
-            )
 
             resizeGif.execute(
                 contentResolver = contentResolver,
@@ -330,23 +309,14 @@ class MainViewModel @Inject constructor() : ViewModel() {
                 }
             }.onCompletion {
                 updateState((state as MainState.DisplayGif).copy(loadingState = Idle))
-            }.flowOn(dispatcher).launchIn(viewModelScope)
+            }.flowOn(ioDispatcher).launchIn(viewModelScope)
         }
     }
 
 
-    private fun clearCachedFiles() {
-        // TODO: It will be injected with Hilt
-        val clearGifCache: ClearGifCache = ClearGifCacheUseCase(
-            cacheProvided = cacheProvider!! // TODO: get rid of !! later
-        )
-        clearGifCache.execute().onEach { _ ->
-            // Do not update UI here. Should just succeed of fail silently
-        }.flowOn(dispatcher).launchIn(viewModelScope)
-    }
+
 
     fun deleteGif() {
-        clearCachedFiles()
         check(state is MainState.DisplayGif) { "deleteGif: Invalid state: $state" }
         state =
             MainState.DisplayBackgroundAsset(

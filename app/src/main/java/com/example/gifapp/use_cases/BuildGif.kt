@@ -5,10 +5,16 @@ import android.graphics.Bitmap
 import android.net.Uri
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.*
+import com.example.gifapp.domain.util.CacheProvider
 import com.example.gifapp.domain.util.GifUtil.buildGifAndSaveToInternalStorage
 import com.example.gifapp.domain.util.VersionProvider
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
 interface BuildGif {
 
@@ -22,11 +28,19 @@ interface BuildGif {
     )
 }
 
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class BuildGifModule{
+    @Binds
+    abstract fun provideBuildGif(buildGifUseCase: BuildGifUseCase): BuildGif
+}
+
 /**
  * Use-case for building a gif given a list of [Bitmap]'s. The result gif is saved it to the internal
  * storage. We don't need read/write permission because saving to the cache does not require it.
  */
 class BuildGifUseCase
+@Inject
 constructor(
     private val versionProvider: VersionProvider,
     private val cacheProvider: CacheProvider

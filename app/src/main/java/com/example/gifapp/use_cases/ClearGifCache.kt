@@ -3,17 +3,30 @@ package com.example.gifapp.use_cases
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
+import com.example.gifapp.domain.util.CacheProvider
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
 interface ClearGifCache {
     fun execute(): Flow<DataState<Unit>>
 }
 
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class ClearGifCacheModule {
+    @Binds
+    abstract fun provideClearGifCacheUseCase(clearGifCacheUseCase: ClearGifCacheUseCase): ClearGifCache
+}
+
 /**
  * Use-case for clearing all the cached files from the path via [CacheProvider]
  */
-class ClearGifCacheUseCase constructor(
+class ClearGifCacheUseCase @Inject constructor(
     private val cacheProvided: CacheProvider
 ) : ClearGifCache {
     override fun execute(): Flow<DataState<Unit>> = flow {

@@ -8,7 +8,12 @@ import android.view.View
 import android.view.Window
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.geometry.Rect
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.suspendCancellableCoroutine
+import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.math.roundToInt
 
@@ -34,7 +39,15 @@ interface PixelCopyJob {
     }
 }
 
-class PixelCopyJobUseCase : PixelCopyJob {
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class PixelCopyJobModule {
+    @Binds
+    abstract fun providePixelCopyJobUseCase(pixelCopyJobUseCase: PixelCopyJobUseCase): PixelCopyJob
+}
+
+class PixelCopyJobUseCase
+@Inject constructor() : PixelCopyJob {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun execute(

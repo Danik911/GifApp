@@ -2,7 +2,6 @@ package com.example.gifapp
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -18,8 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.ContextCompat
 import coil.ImageLoader
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
 import com.canhub.cropper.CropImageContract
 import com.canhub.cropper.CropImageContractOptions
 import com.canhub.cropper.CropImageView
@@ -29,19 +26,20 @@ import com.example.gifapp.ui.composable.BackgroundAsset
 import com.example.gifapp.ui.composable.Gif
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
-import com.example.gifapp.use_cases.RealCacheProvided
+import com.example.gifapp.domain.util.RealCacheProvided
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
-    private lateinit var imageLoader: ImageLoader
+    @Inject lateinit var imageLoader: ImageLoader
 
-    fun checkFilePermissions(): Boolean {
+    private fun checkFilePermissions(): Boolean {
         val writePermission = ContextCompat.checkSelfPermission(
             this,
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -119,17 +117,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // TODO("This initialization will be removed after Hilt implementation")
-        viewModel.setCacheProvider(RealCacheProvided(app = application))
-        imageLoader = ImageLoader.Builder(application)
-            .components {
-                if (Build.VERSION.SDK_INT >= 28) {
-                    add(ImageDecoderDecoder.Factory())
-                } else {
-                    add(GifDecoder.Factory())
-                }
-            }
-            .build()
+
+
 
         viewModel.toastEventRelay.onEach { toastEvent ->
             if (toastEvent != null) {

@@ -6,10 +6,16 @@ import android.net.Uri
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.Loading
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Active
+import com.example.gifapp.domain.util.CacheProvider
 import com.example.gifapp.domain.util.GifUtil
 import com.example.gifapp.domain.util.VersionProvider
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
 interface ResizeGif {
     fun execute(
@@ -32,13 +38,20 @@ interface ResizeGif {
     )
 }
 
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class ResizeGifModule{
+    @Binds
+    abstract fun providesResizeGifUseCase(resizeGifUseCase: ResizeGifUseCase): ResizeGif
+}
+
 /**
  * Use-case for resizing a gif
  *
  * The only way to resize Gif accurately is to iteratively resize in until
  * you reach the target size
  */
-class ResizeGifUseCase constructor(
+class ResizeGifUseCase @Inject constructor(
     private val versionProvider: VersionProvider,
     private val cacheProvider: CacheProvider
 ) : ResizeGif {

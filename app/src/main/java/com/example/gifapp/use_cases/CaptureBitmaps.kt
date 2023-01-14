@@ -7,16 +7,22 @@ import android.view.View
 import android.view.Window
 import androidx.compose.ui.geometry.Rect
 import androidx.core.graphics.applyCanvas
+import com.example.gifapp.di.Main
 import com.example.gifapp.domain.model.DataState
 import com.example.gifapp.domain.model.DataState.Loading
 import com.example.gifapp.domain.model.DataState.Loading.LoadingState
 import com.example.gifapp.domain.util.VersionProvider
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_INTERVAL_MS
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 interface CaptureBitmaps {
@@ -33,6 +39,13 @@ interface CaptureBitmaps {
     ): Flow<DataState<List<Bitmap>>>
 }
 
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class CaptureBitmapsModule {
+    @Binds
+    abstract fun provideCaptureBitmapsUseCase(captureBitmapsUseCase: CaptureBitmapsUseCase): CaptureBitmaps
+}
+
 /**
  * UseCase for capturing a list of bitmaps by screenshotting the device every [CAPTURE_INTERVAL_MS]
  *
@@ -42,11 +55,12 @@ interface CaptureBitmaps {
  */
 
 class CaptureBitmapsUseCase
+@Inject
 constructor(
     private val pixelCopyJob: PixelCopyJob,
-    val mainDispatcher: CoroutineDispatcher,
-    val versionProvider: VersionProvider
-    ) :
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    private val versionProvider: VersionProvider
+) :
     CaptureBitmaps {
 
     override fun execute(

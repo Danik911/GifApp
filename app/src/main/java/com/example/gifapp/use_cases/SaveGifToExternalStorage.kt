@@ -16,10 +16,15 @@ import com.example.gifapp.domain.model.DataState.Loading.LoadingState.Idle
 import com.example.gifapp.domain.util.FileNameBuilder
 import com.example.gifapp.domain.util.VersionProvider
 import com.example.gifapp.use_cases.SaveGifToExternalStorageUseCase.Companion.saveGifToExternalStorage
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ViewModelComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.FileOutputStream
+import javax.inject.Inject
 
 interface SaveGifToExternalStorage {
     fun execute(
@@ -28,6 +33,15 @@ interface SaveGifToExternalStorage {
         cachedUri: Uri,
         checkFilePermission: () -> Boolean
     ): Flow<DataState<Unit>>
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class SaveGifToExternalStorageModule {
+    @Binds
+    abstract fun provideSaveGifToExternalStorageUseCase(
+        saveGifToExternalStorageUseCase: SaveGifToExternalStorageUseCase
+    ): SaveGifToExternalStorage
 }
 
 /**
@@ -41,7 +55,7 @@ interface SaveGifToExternalStorage {
  * This pathway is via [saveGifToExternalStorage]
  */
 
-class SaveGifToExternalStorageUseCase constructor(
+class SaveGifToExternalStorageUseCase @Inject constructor(
     private val versionProvider: VersionProvider
 ) : SaveGifToExternalStorage {
 

@@ -8,7 +8,6 @@ import android.os.Build
 import androidx.core.net.toUri
 import com.example.gifapp.use_cases.BuildGif
 import com.example.gifapp.use_cases.BuildGifUseCase
-import com.example.gifapp.use_cases.CacheProvider
 import java.io.ByteArrayOutputStream
 import java.io.File
 
