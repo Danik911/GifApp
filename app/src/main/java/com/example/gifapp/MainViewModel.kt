@@ -22,6 +22,7 @@ import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITM
 import com.example.gifapp.use_cases.CaptureBitmapsUseCase.Companion.CAPTURE_BITMAP_SUCCESS
 import com.example.gifapp.use_cases.ResizeGifUseCase.Companion.RESIZE_GIF_ERROR
 import com.example.gifapp.use_cases.SaveGifToExternalStorageUseCase.Companion.SAVE_GIF_TO_EXTERNAL_STORAGE_ERROR
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
@@ -31,8 +32,10 @@ import kotlinx.coroutines.plus
 import timber.log.Timber
 import java.io.File
 import java.util.*
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor() : ViewModel() {
 
     private val dispatcher = IO
     private val pixelCopy: PixelCopyJob = PixelCopyJobUseCase()

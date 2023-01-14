@@ -30,9 +30,11 @@ import com.example.gifapp.ui.composable.Gif
 import com.example.gifapp.ui.composable.SelectBackgroundAsset
 import com.example.gifapp.ui.composable.theme.GifAppTheme
 import com.example.gifapp.use_cases.RealCacheProvided
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
